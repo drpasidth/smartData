@@ -4,6 +4,11 @@ import App from './App.jsx';
 import { apiRequest, LoginScreen } from './Auth.jsx';
 import './styles.css';
 import './auth-admin.css';
+import './extras.css';
+import { applyAppearance, loadAppearance } from './appearance.js';
+
+// Apply the saved theme/font size before first paint (also covers the sign-in page).
+applyAppearance(loadAppearance());
 
 function Root() {
   const [user, setUser] = useState(null);

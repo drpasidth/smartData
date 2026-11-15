@@ -1,0 +1,7 @@
+{$SITE_ADDRESS} {
+	encode gzip
+	request_body {
+		max_size 2MB
+	}
+	reverse_proxy app:3001
+}

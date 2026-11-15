@@ -1,0 +1,36 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env          # SESSION_SECRET, ENCRYPTION_KEY, ADMIN_SETUP_KEY, ...
+    environment:
+      NODE_ENV: production
+      DATA_DIR: /data
+      TRUST_PROXY: "1"
+      # Served over plain HTTP on port 3333, so cookies can't be Secure-only.
+      # Set COOKIE_SECURE=true in .env if you put HTTPS in front of it.
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    volumes:
+      - app-data:/data      # database + settings persist here
+    expose:
+      - "3001"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "3333:80"           # app is reachable at http://<host>:3333
+    environment:
+      # Caddy listens on plain HTTP :80 inside the container (published as 3333).
+      SITE_ADDRESS: ":80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  app-data:
+  caddy-data:
+  caddy-config:
