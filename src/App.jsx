@@ -11,18 +11,19 @@ import { apiRequest, cancelAllLoads, getLoadCount, subscribeLoads } from './Auth
 import './datasets.css';
 import './dataset-links.css';
 import './load-overlay.css';
-import operationalGuide from '../docs/operational-guide.md?raw';
+import userManual from '../docs/user-manual.md?raw';
+import { renderMarkdown, manualStyles } from './markdown-lite.js';
 
-// Opens the full operational guide in a new browser window.
-function openOperationalGuide() {
+// Opens the user manual in a new browser window, rendered as formatted HTML.
+function openUserManual() {
   const win = window.open('', '_blank');
   if (!win) {
-    alert('Allow pop-ups for this site to view the operational guide.');
+    alert('Allow pop-ups for this site to view the user manual.');
     return;
   }
-  const escaped = operationalGuide.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const body = renderMarkdown(userManual);
   win.document.open();
-  win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Operational Guide - Insightful</title><style>body{margin:0;background:#f7f7f5;color:#1f2328}main{max-width:960px;margin:0 auto;padding:24px}pre{white-space:pre-wrap;word-wrap:break-word;font:15px/1.6 "Segoe UI",system-ui,sans-serif;margin:0}</style></head><body><main><pre>${escaped}</pre></main></body></html>`);
+  win.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Insightful User Manual</title><style>${manualStyles}</style></head><body><main class="manual">${body}</main><script>document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a)return;var el=document.getElementById(a.getAttribute('href').slice(1));if(el){e.preventDefault();el.scrollIntoView({behavior:'smooth'});}});</script></body></html>`);
   win.document.close();
 }
 import { joinDatasetRows, sourceKey, CARDINALITIES } from './datasetJoin.js';
@@ -1225,7 +1226,7 @@ function App({ user, onUserUpdate, onLogout }) {
       </aside>
 
       <main className={`main-area ${collapsed ? 'main-collapsed' : ''}`}>
-        <header className="topbar"><div className="breadcrumb"><button className="mobile-menu icon-btn" onClick={() => setMobileNav(true)} aria-label={t('Open menu')}><Menu size={19}/></button><span>{t('Workspace')}</span><ChevronRight size={14}/><b>{t(activeNav)}</b></div><div className="top-actions"><LanguageSwitch /><div className="status-pill"><span/> {t('All systems normal')}</div><button className="icon-btn search-btn" aria-label={t('Search')}><Search size={18}/></button><button className="icon-btn" aria-label={t('Notifications')}><Bell size={18}/><i className="notification-dot"/></button>{user.role === 'superuser' && <button className="top-admin-btn" onClick={() => setShowAdmin(true)}><Settings2 size={14}/><span>{t('Admin')}</span></button>}<button className="help-btn" onClick={openOperationalGuide}><CircleHelp size={17}/><span>{t('Help')}</span></button></div></header>
+        <header className="topbar"><div className="breadcrumb"><button className="mobile-menu icon-btn" onClick={() => setMobileNav(true)} aria-label={t('Open menu')}><Menu size={19}/></button><span>{t('Workspace')}</span><ChevronRight size={14}/><b>{t(activeNav)}</b></div><div className="top-actions"><LanguageSwitch /><div className="status-pill"><span/> {t('All systems normal')}</div><button className="icon-btn search-btn" aria-label={t('Search')}><Search size={18}/></button><button className="icon-btn" aria-label={t('Notifications')}><Bell size={18}/><i className="notification-dot"/></button>{user.role === 'superuser' && <button className="top-admin-btn" onClick={() => setShowAdmin(true)}><Settings2 size={14}/><span>{t('Admin')}</span></button>}<button className="help-btn" onClick={openUserManual}><CircleHelp size={17}/><span>{t('Help')}</span></button></div></header>
         <div className="content-wrap">
           <div className="page-heading"><div><div className="eyebrow"><span className="eyebrow-line"/> {t('YOUR ANALYTICS WORKSPACE')}</div><h1>{t('Good morning, {name}', { name: user.name || 'Jamie' })} <span className="wave">✳</span></h1><p>{t('Here’s what’s happening with your data today.')}</p></div><div className="heading-actions"><NewChartButton t={t} onPick={setPlacingChart}/><button className="primary-btn heading-btn" onClick={() => setShowConnect(true)}><Plus size={17}/> {t('Connect data')}</button></div></div>
 
