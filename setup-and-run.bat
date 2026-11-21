@@ -1,9 +1,10 @@
 @echo off
 rem ============================================================================
 rem  Insightful - automatic install + autorun (Windows)
-rem  First run : installs Node.js (if missing), installs packages, builds the
-rem              app, creates .env with new secrets, adds an autorun entry to
-rem              Windows Startup, then starts the server and opens the browser.
+rem  First run : installs Node.js (if missing), restores .env from .env.enc
+rem              (asks for password) or creates a new .env, installs packages,
+rem              builds the app, adds an autorun entry to Windows Startup,
+rem              then starts the server and opens the browser.
 rem  Later runs: starts the server directly (also used by the Startup entry
 rem              with the --run argument, which skips the browser).
 rem  To remove autorun: delete "Insightful-Autorun.lnk" from the Startup folder
@@ -47,18 +48,38 @@ if errorlevel 1 goto old_node
 
 echo.
 echo ==== [2/5] Preparing configuration (.env) ====
-if exist ".env" goto env_ok
+if exist ".env" (
+  echo .env already exists, keeping it.
+  goto ensure_env
+)
+if exist ".env.enc" goto restore_env
+goto create_env
+
+:restore_env
+echo Found .env.enc. Enter its password to restore .env.
+set "TRIES=0"
+:decrypt_try
+set /a TRIES+=1
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$p=Read-Host 'Password' -AsSecureString; $b=[Runtime.InteropServices.Marshal]::SecureStringToBSTR($p); $env:ENV_PASSWORD=[Runtime.InteropServices.Marshal]::PtrToStringBSTR($b); [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($b); node tools/env-crypt.mjs decrypt; exit $LASTEXITCODE"
+if not errorlevel 1 goto ensure_env
+if %TRIES% lss 3 (
+  echo Wrong password or corrupted file. Try again.
+  goto decrypt_try
+)
+echo Could not restore .env after 3 attempts.
+goto fail
+
+:create_env
+echo No .env or .env.enc found. Creating a new .env with random secrets.
 if not exist "server\.env.example" goto fail
-node -e "const fs=require('fs');const c=require('crypto');const r=()=>c.randomBytes(48).toString('base64url');let t=fs.readFileSync('server/.env.example','utf8');t=t.replace('replace-with-a-long-random-secret',r()).replace('replace-with-a-different-random-encryption-secret',r()).replace('replace-with-a-one-time-random-setup-key',r()).replace('NODE_ENV=development','NODE_ENV=production').replace('# COOKIE_SECURE=false','COOKIE_SECURE=false');fs.writeFileSync('.env',t);console.log('Created .env with new random secrets.');console.log(t.match(/^ADMIN_SETUP_KEY=.*/m)[0]);"
+node -e "const fs=require('fs');const c=require('crypto');const r=()=>c.randomBytes(48).toString('base64url');let t=fs.readFileSync('server/.env.example','utf8');t=t.replace('replace-with-a-long-random-secret',r()).replace('replace-with-a-different-random-encryption-secret',r()).replace('replace-with-a-one-time-random-setup-key',r()).replace('NODE_ENV=development','NODE_ENV=production').replace('# COOKIE_SECURE=false','COOKIE_SECURE=false');fs.writeFileSync('.env',t);console.log('Created .env with new random secrets.');"
 if errorlevel 1 goto fail
-echo IMPORTANT: copy the ADMIN_SETUP_KEY line above. You need it for the first-time admin sign-up.
-echo It is also stored in .env. Keep .env and data\ together and back them up.
-goto after_env
+echo IMPORTANT: copy the ADMIN_SETUP_KEY line from .env. You need it for the first-time admin sign-up.
 
-:env_ok
-echo .env already exists, keeping it.
+:ensure_env
+node tools/ensure-env.mjs
+if errorlevel 1 goto fail
 
-:after_env
 echo.
 echo ==== [3/5] Installing packages ====
 if exist "node_modules\" goto deps_ok

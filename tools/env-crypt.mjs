@@ -10,7 +10,9 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const envPath = path.join(root, '.env');
 const encPath = path.join(root, '.env.enc');
-const [mode, password] = process.argv.slice(2);
+const [mode, argPassword] = process.argv.slice(2);
+// Password can be passed as an argument or via the ENV_PASSWORD variable (used by setup-and-run.bat).
+const password = argPassword || process.env.ENV_PASSWORD;
 
 if (!['encrypt', 'decrypt'].includes(mode) || !password) {
   console.error('Usage: node tools/env-crypt.mjs <encrypt|decrypt> <password>');
