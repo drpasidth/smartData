@@ -20,6 +20,12 @@ const TYPES_WITH_X = ['line', 'bar', 'donut', 'boxplot'];
 const TYPES_WITH_AGG = ['bar', 'donut', 'card'];
 const WIDTHS = [300, 380, 520, 680];
 const PALETTE = ['#7168e8', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6', '#ec4899'];
+// Lighten a #rrggbb colour toward white by `amount` (0–1). Used for donut slices of a custom colour.
+const shadeOf = (hex, amount) => {
+  const n = parseInt(hex.slice(1), 16);
+  const mix = (c) => Math.round(c + (255 - c) * amount);
+  return `rgb(${mix((n >> 16) & 255)}, ${mix((n >> 8) & 255)}, ${mix(n & 255)})`;
+};
 const GRID_MIN = 4;
 const GRID_MAX = 100;
 const GRID_DEFAULT = 20;
@@ -147,7 +153,7 @@ function tableColumns(rows, selected) {
 }
 
 // Only re-renders when its data or settings change, or when the refresh tick changes (see the sidebar refresh interval).
-function ChartBodyView({ type, rows, xKey, yKey, agg, theme, t, columns, refreshTick }) {
+function ChartBodyView({ type, rows, xKey, yKey, agg, theme, t, columns, refreshTick, customColor }) {
   if (!rows.length) return <p className="fc-empty">{t('No data to show.')}</p>;
   if (type === 'table') {
     const keys = tableColumns(rows, columns);
@@ -164,7 +170,8 @@ function ChartBodyView({ type, rows, xKey, yKey, agg, theme, t, columns, refresh
     );
   }
   if (!yKey) return <p className="fc-empty">{t('Choose a value column.')}</p>;
-  const color = theme.primary;
+  // A chart's own colour wins; otherwise it follows the page theme.
+  const color = customColor || theme.primary;
   const tick = theme.tick;
   const grid = theme.grid;
   const axisProps = { axisLine: false, tickLine: false, tick: { fill: tick, fontSize: 11 } };
@@ -218,7 +225,7 @@ function ChartBodyView({ type, rows, xKey, yKey, agg, theme, t, columns, refresh
     const label = AGGS.find(([v]) => v === agg)?.[1] || 'Sum';
     return (
       <div className="fc-card-value">
-        <b>{value === null ? '—' : Number(value).toLocaleString(undefined, { maximumFractionDigits: 2 })}</b>
+        <b style={customColor ? { color: customColor } : undefined}>{value === null ? '—' : Number(value).toLocaleString(undefined, { maximumFractionDigits: 2 })}</b>
         <span>{t(label)} · {yKey.replace(/_/g, ' ')}</span>
       </div>
     );
@@ -230,7 +237,7 @@ function ChartBodyView({ type, rows, xKey, yKey, agg, theme, t, columns, refresh
       <ResponsiveContainer width="100%" height="100%">
         <RePieChart>
           <Pie data={data} dataKey="value" nameKey="name" innerRadius="55%" outerRadius="85%" paddingAngle={2}>
-            {data.map((_, i) => <Cell key={i} fill={PALETTE[i % PALETTE.length]} />)}
+            {data.map((_, i) => <Cell key={i} fill={customColor ? shadeOf(customColor, Math.min(0.6, i * 0.14)) : PALETTE[i % PALETTE.length]} />)}
           </Pie>
           <Tooltip />
           <Legend />
@@ -533,6 +540,15 @@ export default function FreeChartCanvas({ storageKey, sourceOptions, loadSourceR
                 {WIDTHS.map((w) => <option key={w} value={w}>{w}px</option>)}
               </select>
             </label>
+            <div className="fc-color-field" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <span>{t('Chart color')}</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <input type="color" aria-label={t('Chart color')} value={chart.color || chartTheme.primary} onChange={(e) => update(chart.id, { color: e.target.value })} style={{ width: 44, height: 28, padding: 0, border: 'none', background: 'none', cursor: 'pointer' }} />
+                {chart.color
+                  ? <button type="button" className="text-action" onClick={() => update(chart.id, { color: undefined })}>{t('Use theme color')}</button>
+                  : <small>{t('Follows page theme')}</small>}
+              </span>
+            </div>
             <label style={{ gridColumn: '1 / -1' }}>{t('Title')}
               <input value={chart.title} maxLength={60} placeholder={t(typeLabel)} onChange={(e) => update(chart.id, { title: e.target.value })} />
             </label>
@@ -541,7 +557,7 @@ export default function FreeChartCanvas({ storageKey, sourceOptions, loadSourceR
         <div className="fc-body">
           {loading
             ? <p className="fc-empty">{t('Loading data…')}</p>
-            : <ChartBody type={chart.type} rows={rows} xKey={xKey} yKey={yKey} agg={agg} theme={chartTheme} t={t} columns={chart.columns} refreshTick={refreshTick} />}
+            : <ChartBody type={chart.type} rows={rows} xKey={xKey} yKey={yKey} agg={agg} theme={chartTheme} t={t} columns={chart.columns} refreshTick={refreshTick} customColor={chart.color} />}
         </div>
         <ResizeHandle minW={240} minH={160} onResize={(w, h) => update(chart.id, { w: Math.max(240, snapTo(w, gridSize)), h: Math.max(160, snapTo(h, gridSize)) })} />
       </article>

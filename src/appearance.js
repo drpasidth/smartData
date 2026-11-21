@@ -66,6 +66,61 @@ export const THEMES = [
     },
     chart: { grid: '#dfe8d6', tick: '#7c9171', tooltipBg: '#f8fbf5', tooltipBorder: '#d5e0ca', text: '#3d5036', primary: '#4f8a4a', secondary: '#c28a3c', dotStroke: '#f8fbf5' },
   },
+  {
+    id: 'sunset', label: 'Sunset', dark: false, swatch: ['#fff1e6', '#ff5e3a'],
+    vars: {
+      '--bg': '#fff1e6', '--surface': '#fffaf6', '--surface-2': '#ffe9d9', '--surface-3': '#ffdcc4',
+      '--border': '#ffd3b6', '--border-soft': '#ffe3d0',
+      '--text': '#3d1a0e', '--text-2': '#6b3320', '--text-3': '#8f4f38', '--muted': '#b07a62',
+      '--accent': '#ff5e3a', '--accent-soft': '#ffe0d3', '--accent-text': '#e0401c', '--accent-border': '#ffc6ad',
+      '--btn': '#f2452a', '--btn-hover': '#d93a20', '--glow': '0.8', '--shadow': '#7a2a0f22', '--tint': '90%',
+    },
+    chart: { grid: '#ffd9c4', tick: '#b07a62', tooltipBg: '#fffaf6', tooltipBorder: '#ffd3b6', text: '#6b3320', primary: '#ff5e3a', secondary: '#ffb000', dotStroke: '#fffaf6' },
+  },
+  {
+    id: 'ocean-neon', label: 'Ocean neon', dark: true, swatch: ['#061826', '#22d3ee'],
+    vars: {
+      '--bg': '#061826', '--surface': '#0b2436', '--surface-2': '#10304a', '--surface-3': '#16405f',
+      '--border': '#1d5274', '--border-soft': '#153d5a',
+      '--text': '#e6fbff', '--text-2': '#b9eef7', '--text-3': '#8fd9e8', '--muted': '#6bbfd2',
+      '--accent': '#22d3ee', '--accent-soft': '#0b3d4d', '--accent-text': '#67e8f9', '--accent-border': '#14607a',
+      '--btn': '#06b6d4', '--btn-hover': '#22c7e6', '--glow': '0.35', '--shadow': '#00101f88', '--tint': '22%',
+    },
+    chart: { grid: '#17405a', tick: '#6bbfd2', tooltipBg: '#10304a', tooltipBorder: '#1d5274', text: '#b9eef7', primary: '#22d3ee', secondary: '#a3e635', dotStroke: '#0b2436' },
+  },
+  {
+    id: 'berry-pop', label: 'Berry pop', dark: false, swatch: ['#fdf0fa', '#e11d8a'],
+    vars: {
+      '--bg': '#fdf0fa', '--surface': '#fffafd', '--surface-2': '#fbe4f3', '--surface-3': '#f6d2ea',
+      '--border': '#f3c2e2', '--border-soft': '#f9dcef',
+      '--text': '#3a0f2b', '--text-2': '#5e1d46', '--text-3': '#82366a', '--muted': '#a8639a',
+      '--accent': '#e11d8a', '--accent-soft': '#fbd6ec', '--accent-text': '#b8126f', '--accent-border': '#f5b3dc',
+      '--btn': '#d01b7d', '--btn-hover': '#b0106a', '--glow': '0.8', '--shadow': '#5a0a3a22', '--tint': '90%',
+    },
+    chart: { grid: '#f6d2ea', tick: '#a8639a', tooltipBg: '#fffafd', tooltipBorder: '#f3c2e2', text: '#5e1d46', primary: '#e11d8a', secondary: '#0ea5e9', dotStroke: '#fffafd' },
+  },
+  {
+    id: 'lime-jungle', label: 'Lime jungle', dark: false, swatch: ['#f1fbdf', '#65a30d'],
+    vars: {
+      '--bg': '#f1fbdf', '--surface': '#fbfff4', '--surface-2': '#e6f7c8', '--surface-3': '#d9f1b0',
+      '--border': '#c8e89a', '--border-soft': '#dcf2bd',
+      '--text': '#1d3006', '--text-2': '#33500e', '--text-3': '#4f7418', '--muted': '#71963a',
+      '--accent': '#65a30d', '--accent-soft': '#d9f5a6', '--accent-text': '#4a7d08', '--accent-border': '#bde680',
+      '--btn': '#5a9e0c', '--btn-hover': '#4a8607', '--glow': '0.8', '--shadow': '#1d300622', '--tint': '90%',
+    },
+    chart: { grid: '#d4eeaa', tick: '#71963a', tooltipBg: '#fbfff4', tooltipBorder: '#c8e89a', text: '#33500e', primary: '#65a30d', secondary: '#f97316', dotStroke: '#fbfff4' },
+  },
+  {
+    id: 'cyber-purple', label: 'Cyber purple', dark: true, swatch: ['#14061f', '#d946ef'],
+    vars: {
+      '--bg': '#14061f', '--surface': '#1e0b2e', '--surface-2': '#27103d', '--surface-3': '#321650',
+      '--border': '#4a1d72', '--border-soft': '#361457',
+      '--text': '#fbeeff', '--text-2': '#eccfff', '--text-3': '#d9a8f5', '--muted': '#b07fd6',
+      '--accent': '#e879f9', '--accent-soft': '#3d1152', '--accent-text': '#f0abfc', '--accent-border': '#5e1f8a',
+      '--btn': '#c026d3', '--btn-hover': '#d946ef', '--glow': '0.3', '--shadow': '#0a000f88', '--tint': '20%',
+    },
+    chart: { grid: '#3a1560', tick: '#b07fd6', tooltipBg: '#27103d', tooltipBorder: '#4a1d72', text: '#eccfff', primary: '#e879f9', secondary: '#facc15', dotStroke: '#1e0b2e' },
+  },
 ];
 
 export const getTheme = (id) => THEMES.find((theme) => theme.id === id) || THEMES[0];
