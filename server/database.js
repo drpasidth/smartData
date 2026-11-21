@@ -33,6 +33,13 @@ export async function createDatabase(config) {
     try { db = new SQL.Database(new Uint8Array(await readFile(config.filename))); }
     catch (error) { if (error.code !== 'ENOENT') throw error; db = new SQL.Database(); }
     db.run('CREATE TABLE IF NOT EXISTS app_state (id INTEGER PRIMARY KEY CHECK (id = 1), payload TEXT NOT NULL)');
+    let flushTimer;
+    const persist = async () => {
+      await mkdir(path.dirname(config.filename), { recursive: true });
+      const temp = `${config.filename}.tmp`;
+      await writeFile(temp, Buffer.from(db.export()), { mode: 0o600 });
+      await rename(temp, config.filename);
+    };
     return {
       async load() {
         const result = db.exec('SELECT payload FROM app_state WHERE id = 1');
@@ -46,6 +53,21 @@ export async function createDatabase(config) {
         await rename(temp, config.filename);
       },
       async close() { db.close(); },
+      async runSql(sql, params = []) {
+        const stmt = db.prepare(sql);
+        let columns = [];
+        const values = [];
+        try {
+          stmt.bind(params);
+          while (stmt.step()) values.push(stmt.get());
+          columns = stmt.getColumnNames();
+        } finally { stmt.free(); }
+        if (!/^\s*(SELECT|PRAGMA)/i.test(sql)) {
+          clearTimeout(flushTimer);
+          flushTimer = setTimeout(() => { persist().catch(() => {}); }, 300);
+        }
+        return columns.length ? [{ columns, values }] : [];
+      },
     };
   }
 

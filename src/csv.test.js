@@ -4,16 +4,16 @@ import { parseCSV } from './csv.js';
 
 test('parses quoted commas, escaped quotes, and newlines', () => {
   const rows = parseCSV('name,notes,revenue\n"Acme, Inc.","Said ""hello""\nthen left","$1,250"\n');
-  assert.deepEqual(rows, [{ name: 'Acme, Inc.', notes: 'Said "hello"\nthen left', revenue: 1250, month: 'Acme, Inc.' }]);
+  assert.deepEqual(rows, [{ name: 'Acme, Inc.', notes: 'Said "hello"\nthen left', revenue: 1250 }]);
 });
 
-test('normalizes a BOM, duplicate headers, and date columns', () => {
+test('uses the header row as column names, normalizes BOM and duplicate headers', () => {
   const rows = parseCSV('\uFEFFOrder Date,total,total\n2025-01-01,1,2\n');
-  assert.deepEqual(rows, [{ month: '2025-01-01', total: 1, total_2: 2 }]);
+  assert.deepEqual(rows, [{ order_date: '2025-01-01', total: 1, total_2: 2 }]);
 });
 
 test('retains empty values and ignores blank records', () => {
-  assert.deepEqual(parseCSV('label,value\nalpha,\n\n'), [{ label: 'alpha', value: '', month: 'alpha' }]);
+  assert.deepEqual(parseCSV('label,value\nalpha,\n\n'), [{ label: 'alpha', value: '' }]);
 });
 
 test('rejects malformed and header-only CSV input', () => {

@@ -73,14 +73,13 @@ export function parseCSV(text) {
   const headers = records[0].map((header, index) => normalizeHeader(header, index));
   if (headers.every((header) => /^column_\d+$/.test(header))) throw new Error('The CSV header row is empty.');
 
-  const dateIndex = headers.findIndex((header) => /^(date|datetime|timestamp|month|day|time)(_|$)|_(date|month|day|time)(_|$)/.test(header));
+  // The first row is the header: every column keeps its header name as the key.
   const keys = [];
   const usedKeys = new Set();
-  headers.forEach((header, index) => {
-    const baseKey = index === dateIndex ? 'month' : header;
-    let key = baseKey;
+  headers.forEach((header) => {
+    let key = header;
     let suffix = 2;
-    while (usedKeys.has(key)) key = `${baseKey}_${suffix++}`;
+    while (usedKeys.has(key)) key = `${header}_${suffix++}`;
     usedKeys.add(key);
     keys.push(key);
   });
@@ -93,7 +92,6 @@ export function parseCSV(text) {
     keys.forEach((key, columnIndex) => {
       if (columnIndex < cells.length) row[key] = parseValue(cells[columnIndex]);
     });
-    if (dateIndex < 0) row.month = cells[0]?.trim() || `Row ${rowIndex + 1}`;
     return row;
   });
 

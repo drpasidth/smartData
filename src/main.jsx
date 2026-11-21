@@ -5,7 +5,9 @@ import { apiRequest, LoginScreen } from './Auth.jsx';
 import './styles.css';
 import './auth-admin.css';
 import './extras.css';
+import './data-source.css';
 import { applyAppearance, loadAppearance } from './appearance.js';
+import { I18nProvider } from './i18n.jsx';
 
 // Apply the saved theme/font size before first paint (also covers the sign-in page).
 applyAppearance(loadAppearance());
@@ -27,5 +29,5 @@ function Root() {
 }
 
 createRoot(document.getElementById('root')).render(
-  <React.StrictMode><Root /></React.StrictMode>
+  <React.StrictMode><I18nProvider><Root /></I18nProvider></React.StrictMode>
 );
