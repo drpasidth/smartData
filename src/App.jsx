@@ -11,19 +11,23 @@ import { apiRequest, cancelAllLoads, getLoadCount, subscribeLoads } from './Auth
 import './datasets.css';
 import './dataset-links.css';
 import './load-overlay.css';
-import userManual from '../docs/user-manual.md?raw';
+import userManualEn from '../docs/user-manual.md?raw';
+import userManualTh from '../docs/user-manual.th.md?raw';
 import { renderMarkdown, manualStyles } from './markdown-lite.js';
+import { getLang } from './i18n.jsx';
 
-// Opens the user manual in a new browser window, rendered as formatted HTML.
+// Opens the user manual in a new browser window, in the language selected in the top bar.
 function openUserManual() {
+  const isThai = getLang() === 'th';
   const win = window.open('', '_blank');
   if (!win) {
-    alert('Allow pop-ups for this site to view the user manual.');
+    alert(isThai ? 'กรุณาอนุญาต pop-up สำหรับเว็บไซต์นี้เพื่อเปิดคู่มือผู้ใช้' : 'Allow pop-ups for this site to view the user manual.');
     return;
   }
-  const body = renderMarkdown(userManual);
+  const body = renderMarkdown(isThai ? userManualTh : userManualEn);
+  const title = isThai ? 'คู่มือผู้ใช้ Insightful' : 'Insightful User Manual';
   win.document.open();
-  win.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Insightful User Manual</title><style>${manualStyles}</style></head><body><main class="manual">${body}</main><script>document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a)return;var el=document.getElementById(a.getAttribute('href').slice(1));if(el){e.preventDefault();el.scrollIntoView({behavior:'smooth'});}});</script></body></html>`);
+  win.document.write(`<!doctype html><html lang="${isThai ? 'th' : 'en'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><style>${manualStyles}</style></head><body><main class="manual">${body}</main><script>document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a)return;var el=document.getElementById(a.getAttribute('href').slice(1));if(el){e.preventDefault();el.scrollIntoView({behavior:'smooth'});}});</script></body></html>`);
   win.document.close();
 }
 import { joinDatasetRows, sourceKey, CARDINALITIES } from './datasetJoin.js';

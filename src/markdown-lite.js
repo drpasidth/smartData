@@ -8,7 +8,8 @@ function escapeHtml(text) {
 }
 
 function slugify(text) {
-  return text.toLowerCase().replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-');
+  // Keep Unicode letters, marks and digits so Thai headings get usable anchors.
+  return text.toLowerCase().replace(/[^\p{L}\p{M}\p{N}\s-]/gu, '').trim().replace(/\s+/g, '-');
 }
 
 function inline(text) {
